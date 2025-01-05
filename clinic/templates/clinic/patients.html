@@ -5,7 +5,6 @@
 {% block content %}
 <h2>Patients Management</h2>
 
-<!-- Create Form -->
 <div class="card mb-4">
     <div class="card-body">
         <h5 class="card-title">Add New Patient</h5>
@@ -33,7 +32,6 @@
     </div>
 </div>
 
-<!-- Patients Table -->
 <div class="card">
     <div class="card-body">
         <h5 class="card-title">Patients List</h5>
@@ -64,7 +62,6 @@
     document.addEventListener('DOMContentLoaded', function () {
         loadPatients();
 
-        // Form submission
         document.getElementById('patientForm').addEventListener('submit', function (e) {
             e.preventDefault();
             if (isEditing) return;
@@ -179,7 +176,6 @@
         isEditing = false;
     }
 
-    // Helper function to get CSRF token
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {

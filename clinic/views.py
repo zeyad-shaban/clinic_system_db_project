@@ -5,16 +5,21 @@ from .sql_queries import (
     add_doctor, get_all_doctors, update_doctor, delete_doctor,
     add_department, get_all_departments, update_department, delete_department,
     add_appointment, get_all_appointments, update_appointment, delete_appointment,
-    add_prescription, get_all_prescriptions, update_prescription, delete_prescription
+    add_prescription, get_all_prescriptions, update_prescription, delete_prescription,
+    get_doctors_count_by_specialty, get_average_doctor_fee,
+    get_appointments_with_details, get_prescriptions_with_appointment_details
 )
 
-# Home page with navigation
+
 def home(request):
     return render(request, "clinic/home.html")
 
 # Patients CRUD APIs
+
+
 def patients_page(request):
     return render(request, "clinic/patients.html")
+
 
 def get_patients(request):
     patients = get_all_patients()
@@ -23,6 +28,7 @@ def get_patients(request):
         for p in patients
     ]
     return JsonResponse({"patients": data})
+
 
 def add_new_patient(request):
     if request.method == "POST":
@@ -33,10 +39,12 @@ def add_new_patient(request):
         add_patient(name, email, phone, age)
         return JsonResponse({"message": "Patient added successfully!"})
 
+
 def delete_patient_view(request, patient_id):
     if request.method == "POST":
         delete_patient(patient_id)
         return JsonResponse({"message": "Patient deleted successfully"})
+
 
 def update_patient_view(request, patient_id):
     if request.method == "POST":
@@ -48,16 +56,21 @@ def update_patient_view(request, patient_id):
         return JsonResponse({"message": "Patient updated successfully"})
 
 # Doctors CRUD APIs
+
+
 def doctors_page(request):
     return render(request, "clinic/doctors.html")
+
 
 def get_doctors(request):
     doctors = get_all_doctors()
     data = [
-        {"id": d[0], "name": d[1], "specialty": d[2], "phone": d[3], "fee": d[4]}
+        {"id": d[0], "name": d[1], "specialty": d[2],
+            "phone": d[3], "fee": d[4]}
         for d in doctors
     ]
     return JsonResponse({"doctors": data})
+
 
 def add_new_doctor(request):
     if request.method == "POST":
@@ -68,10 +81,12 @@ def add_new_doctor(request):
         add_doctor(name, specialty, phone, fee)
         return JsonResponse({"message": "Doctor added successfully!"})
 
+
 def delete_doctor_view(request, doctor_id):
     if request.method == "POST":
         delete_doctor(doctor_id)
         return JsonResponse({"message": "Doctor deleted successfully"})
+
 
 def update_doctor_view(request, doctor_id):
     if request.method == "POST":
@@ -82,9 +97,21 @@ def update_doctor_view(request, doctor_id):
         update_doctor(doctor_id, name, specialty, phone, fee)
         return JsonResponse({"message": "Doctor updated successfully"})
 
+
+def get_doctor_stats(request):
+    specialty_counts = get_doctors_count_by_specialty()
+    avg_fee = get_average_doctor_fee()
+    return JsonResponse({
+        "specialty_counts": [{"specialty": s[0], "count": s[1]} for s in specialty_counts],
+        "average_fee": round(avg_fee[0], 2) if avg_fee[0] else 0
+    })
+
 # Departments CRUD APIs
+
+
 def departments_page(request):
     return render(request, "clinic/departments.html")
+
 
 def get_departments(request):
     departments = get_all_departments()
@@ -94,6 +121,7 @@ def get_departments(request):
     ]
     return JsonResponse({"departments": data})
 
+
 def add_new_department(request):
     if request.method == "POST":
         name = request.POST["name"]
@@ -102,10 +130,12 @@ def add_new_department(request):
         add_department(name, head, floor)
         return JsonResponse({"message": "Department added successfully!"})
 
+
 def delete_department_view(request, department_id):
     if request.method == "POST":
         delete_department(department_id)
         return JsonResponse({"message": "Department deleted successfully"})
+
 
 def update_department_view(request, department_id):
     if request.method == "POST":
@@ -116,16 +146,21 @@ def update_department_view(request, department_id):
         return JsonResponse({"message": "Department updated successfully"})
 
 # Appointments CRUD APIs
+
+
 def appointments_page(request):
     return render(request, "clinic/appointments.html")
+
 
 def get_appointments(request):
     appointments = get_all_appointments()
     data = [
-        {"id": a[0], "patient_id": a[1], "doctor_id": a[2], "date": a[3], "time": a[4]}
+        {"id": a[0], "patient_id": a[1],
+            "doctor_id": a[2], "date": a[3], "time": a[4]}
         for a in appointments
     ]
     return JsonResponse({"appointments": data})
+
 
 def add_new_appointment(request):
     if request.method == "POST":
@@ -136,10 +171,12 @@ def add_new_appointment(request):
         add_appointment(patient_id, doctor_id, date, time)
         return JsonResponse({"message": "Appointment added successfully!"})
 
+
 def delete_appointment_view(request, appointment_id):
     if request.method == "POST":
         delete_appointment(appointment_id)
         return JsonResponse({"message": "Appointment deleted successfully"})
+
 
 def update_appointment_view(request, appointment_id):
     if request.method == "POST":
@@ -150,9 +187,28 @@ def update_appointment_view(request, appointment_id):
         update_appointment(appointment_id, patient_id, doctor_id, date, time)
         return JsonResponse({"message": "Appointment updated successfully"})
 
+
+def get_detailed_appointments(request):
+    appointments = get_appointments_with_details()
+    data = [
+        {
+            "id": a[0],
+            "patient_id": a[1],
+            "patient": a[2],
+            "doctor_id": a[3],
+            "doctor": a[4],
+            "date": a[5],
+            "time": a[6]
+        } for a in appointments
+    ]
+    return JsonResponse({"appointments": data})
+
 # Prescriptions CRUD APIs
+
+
 def prescriptions_page(request):
     return render(request, "clinic/prescriptions.html")
+
 
 def get_prescriptions(request):
     prescriptions = get_all_prescriptions()
@@ -162,6 +218,7 @@ def get_prescriptions(request):
     ]
     return JsonResponse({"prescriptions": data})
 
+
 def add_new_prescription(request):
     if request.method == "POST":
         appointment_id = request.POST["appointment_id"]
@@ -170,10 +227,12 @@ def add_new_prescription(request):
         add_prescription(appointment_id, medicines, notes)
         return JsonResponse({"message": "Prescription added successfully!"})
 
+
 def delete_prescription_view(request, prescription_id):
     if request.method == "POST":
         delete_prescription(prescription_id)
         return JsonResponse({"message": "Prescription deleted successfully"})
+
 
 def update_prescription_view(request, prescription_id):
     if request.method == "POST":
@@ -182,3 +241,19 @@ def update_prescription_view(request, prescription_id):
         notes = request.POST["notes"]
         update_prescription(prescription_id, appointment_id, medicines, notes)
         return JsonResponse({"message": "Prescription updated successfully"})
+
+
+def get_detailed_prescriptions(request):
+    prescriptions = get_prescriptions_with_appointment_details()
+    data = [
+        {
+            "id": p[0],
+            "appointment_id": p[1],
+            "patient": p[2],
+            "doctor": p[3],
+            "date": p[4],
+            "medicines": p[5],
+            "notes": p[6]
+        } for p in prescriptions
+    ]
+    return JsonResponse({"prescriptions": data})

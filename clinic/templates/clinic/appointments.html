@@ -5,7 +5,6 @@
 {% block content %}
 <h2>Appointments Management</h2>
 
-<!-- Create Form -->
 <div class="card mb-4">
     <div class="card-body">
         <h5 class="card-title">Schedule New Appointment</h5>
@@ -37,7 +36,6 @@
     </div>
 </div>
 
-<!-- Appointments Table -->
 <div class="card">
     <div class="card-body">
         <h5 class="card-title">Appointments List</h5>
@@ -123,17 +121,19 @@
     }
 
     function loadAppointments() {
-        fetch('/api/appointments/')
+        fetch('/api/detailed/appointments/')
             .then(response => response.json())
             .then(data => {
                 const tbody = document.getElementById('appointmentsTableBody');
                 tbody.innerHTML = '';
                 data.appointments.forEach(appointment => {
                     tbody.innerHTML += `
-                    <tr data-id="${appointment.id}">
+                    <tr data-id="${appointment.id}" 
+                        data-patient-id="${appointment.patient_id}"
+                        data-doctor-id="${appointment.doctor_id}">
                         <td>${appointment.id}</td>
-                        <td>${appointment.patient_id}</td>
-                        <td>${appointment.doctor_id}</td>
+                        <td>${appointment.patient}</td>
+                        <td>${appointment.doctor}</td>
                         <td>${appointment.date}</td>
                         <td>${appointment.time}</td>
                         <td>
@@ -178,13 +178,13 @@
         const form = document.getElementById('appointmentForm');
         const submitButton = form.querySelector('button[type="submit"]');
 
-        submitButton.textContent = 'Save Edit';
-
-        document.getElementById('patient_id').value = row.cells[1].textContent;
-        document.getElementById('doctor_id').value = row.cells[2].textContent;
+        document.getElementById('patient_id').value = row.dataset.patientId;
+        document.getElementById('doctor_id').value = row.dataset.doctorId;
         document.getElementById('date').value = row.cells[3].textContent;
         document.getElementById('time').value = row.cells[4].textContent;
 
+        submitButton.textContent = 'Save Edit';
+        
         form.onsubmit = (e) => {
             e.preventDefault();
             updateAppointment(id);

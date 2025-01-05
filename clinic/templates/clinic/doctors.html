@@ -5,7 +5,6 @@
 {% block content %}
 <h2>Doctors Management</h2>
 
-<!-- Create Form -->
 <div class="card mb-4">
     <div class="card-body">
         <h5 class="card-title">Add New Doctor</h5>
@@ -33,7 +32,6 @@
     </div>
 </div>
 
-<!-- Doctors Table -->
 <div class="card">
     <div class="card-body">
         <h5 class="card-title">Doctors List</h5>
@@ -66,7 +64,7 @@
 
         document.getElementById('doctorForm').addEventListener('submit', function (e) {
             e.preventDefault();
-            if (isEditing) return; // Prevent adding new entry when editing
+            if (isEditing) return;
 
             const formData = new FormData();
             formData.append('name', document.getElementById('name').value);
@@ -145,7 +143,6 @@
         const form = document.getElementById('doctorForm');
         const submitButton = form.querySelector('button[type="submit"]');
 
-        // Change button text
         submitButton.textContent = 'Save Edit';
 
         document.getElementById('name').value = row.cells[1].textContent;
@@ -153,7 +150,6 @@
         document.getElementById('phone').value = row.cells[3].textContent;
         document.getElementById('fee').value = row.cells[4].textContent;
 
-        // Modify the form submission
         form.onsubmit = (e) => {
             e.preventDefault();
             updateDoctor(id);

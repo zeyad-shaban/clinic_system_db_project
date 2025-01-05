@@ -1,21 +1,68 @@
 {% extends 'clinic/base.html' %}
 
 {% block content %}
-<div class="text-center">
-    <h1 class="display-4">Welcome to Clinic System</h1>
-    <p class="lead">Manage your clinic operations efficiently</p>
-    
-    <div class="row mt-5">
-        <div class="col-md-4 mb-4">
+<div class="container">
+    <div class="text-center mb-5">
+        <h1 class="display-4">Welcome to Clinic System</h1>
+        <p class="lead">Manage your clinic operations efficiently</p>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Patients</h5>
-                    <p class="card-text">Manage patient records and information</p>
-                    <a href="{% url 'patients_page' %}" class="btn btn-primary">Go to Patients</a>
+                    <h5 class="card-title">Doctors by Specialty</h5>
+                    <canvas id="specialtyChart"></canvas>
                 </div>
             </div>
         </div>
-        <!-- Add similar cards for other sections -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Average Doctor Fee</h5>
+                    <h2 class="display-4 text-center" id="averageFee">$0</h2>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadDoctorStats();
+});
+
+function loadDoctorStats() {
+    fetch('/api/stats/doctors/')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('averageFee').textContent = `$${data.average_fee}`;
+            
+            const ctx = document.getElementById('specialtyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.specialty_counts.map(item => item.specialty),
+                    datasets: [{
+                        data: data.specialty_counts.map(item => item.count),
+                        backgroundColor:    [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        });
+}
+</script>
+{% endblock %}
 {% endblock %}

@@ -5,7 +5,6 @@
 {% block content %}
 <h2>Prescriptions Management</h2>
 
-<!-- Create Form -->
 <div class="card mb-4">
     <div class="card-body">
         <h5 class="card-title">Add New Prescription</h5>
@@ -32,7 +31,6 @@
     </div>
 </div>
 
-<!-- Prescriptions Table -->
 <div class="card">
     <div class="card-body">
         <h5 class="card-title">Prescriptions List</h5>
@@ -41,7 +39,9 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Appointment</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Date</th>
                         <th>Medicines</th>
                         <th>Notes</th>
                         <th>Actions</th>
@@ -102,16 +102,19 @@
     }
 
     function loadPrescriptions() {
-        fetch('/api/prescriptions/')
+        fetch('/api/detailed/prescriptions/')
             .then(response => response.json())
             .then(data => {
                 const tbody = document.getElementById('prescriptionsTableBody');
                 tbody.innerHTML = '';
                 data.prescriptions.forEach(prescription => {
                     tbody.innerHTML += `
-                    <tr data-id="${prescription.id}">
+                    <tr data-id="${prescription.id}" 
+                        data-appointment-id="${prescription.appointment_id}">
                         <td>${prescription.id}</td>
-                        <td>Appointment ${prescription.appointment_id}</td>
+                        <td>${prescription.patient}</td>
+                        <td>${prescription.doctor}</td>
+                        <td>${prescription.date}</td>
                         <td>${prescription.medicines}</td>
                         <td>${prescription.notes || '-'}</td>
                         <td>
@@ -152,15 +155,15 @@
 
     function editPrescription(id) {
         isEditing = true;
-        
         const row = document.querySelector(`tr[data-id="${id}"]`);
         const form = document.getElementById('prescriptionForm');
         const submitButton = form.querySelector('button[type="submit"]');
 
+        document.getElementById('appointment_id').value = row.dataset.appointmentId;
+        document.getElementById('medicines').value = row.cells[4].textContent;
+        document.getElementById('notes').value = row.cells[5].textContent === '-' ? '' : row.cells[5].textContent;
+
         submitButton.textContent = 'Save Edit';
-        document.getElementById('appointment_id').value = row.cells[1].textContent.split(' ')[1];
-        document.getElementById('medicines').value = row.cells[2].textContent;
-        document.getElementById('notes').value = row.cells[3].textContent === '-' ? '' : row.cells[3].textContent;
 
         form.onsubmit = (e) => {
             e.preventDefault();
