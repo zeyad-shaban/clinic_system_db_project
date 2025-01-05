@@ -1,0 +1,198 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Patients - Clinic System{% endblock %}
+
+{% block content %}
+<h2>Patients Management</h2>
+
+<!-- Create Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Add New Patient</h5>
+        <form id="patientForm">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="name" placeholder="Name" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="email" class="form-control" id="email" placeholder="Email" required>
+                </div>
+                <div class="col-md-2">
+                    <input type="tel" class="form-control" id="phone" placeholder="Phone" required>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" id="age" placeholder="Age" required>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary">Add Patient</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Patients Table -->
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Patients List</h5>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Age</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="patientsTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let isEditing = false;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        loadPatients();
+
+        // Form submission
+        document.getElementById('patientForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (isEditing) return;
+
+            const formData = new FormData();
+            formData.append('name', document.getElementById('name').value);
+            formData.append('email', document.getElementById('email').value);
+            formData.append('phone', document.getElementById('phone').value);
+            formData.append('age', document.getElementById('age').value);
+
+            fetch('/api/patients/add/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    loadPatients();
+                    document.getElementById('patientForm').reset();
+                });
+        });
+    });
+
+    function loadPatients() {
+        fetch('/api/patients/')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('patientsTableBody');
+                tbody.innerHTML = '';
+                data.patients.forEach(patient => {
+                    tbody.innerHTML += `
+                    <tr data-id="${patient.id}">
+                        <td>${patient.id}</td>
+                        <td>${patient.name}</td>
+                        <td>${patient.email}</td>
+                        <td>${patient.phone}</td>
+                        <td>${patient.age}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning me-2" onclick="editPatient(${patient.id})">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deletePatient(${patient.id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+                });
+            });
+    }
+
+    function deletePatient(id) {
+        if (confirm('Are you sure you want to delete this patient?')) {
+            fetch(`/api/patients/delete/${id}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    loadPatients();
+                });
+        }
+    }
+
+    function editPatient(id) {
+        isEditing = true;
+        const row = document.querySelector(`tr[data-id="${id}"]`);
+        const form = document.getElementById('patientForm');
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        submitButton.textContent = 'Save Edit';
+
+        document.getElementById('name').value = row.cells[1].textContent;
+        document.getElementById('email').value = row.cells[2].textContent;
+        document.getElementById('phone').value = row.cells[3].textContent;
+        document.getElementById('age').value = row.cells[4].textContent;
+
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            updatePatient(id);
+        };
+    }
+
+    function updatePatient(id) {
+        const formData = new FormData();
+        formData.append('name', document.getElementById('name').value);
+        formData.append('email', document.getElementById('email').value);
+        formData.append('phone', document.getElementById('phone').value);
+        formData.append('age', document.getElementById('age').value);
+
+        fetch(`/api/patients/update/${id}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                loadPatients();
+                resetForm();
+            });
+    }
+
+    function resetForm() {
+        const form = document.getElementById('patientForm');
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        form.reset();
+        submitButton.textContent = 'Add Patient';
+        form.onsubmit = null;
+        isEditing = false;
+    }
+
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

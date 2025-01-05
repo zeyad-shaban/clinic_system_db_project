@@ -1,0 +1,199 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Prescriptions - Clinic System{% endblock %}
+
+{% block content %}
+<h2>Prescriptions Management</h2>
+
+<!-- Create Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Add New Prescription</h5>
+        <form id="prescriptionForm">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <select class="form-select" id="appointment_id" required>
+                        <option value="">Select Appointment</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <textarea class="form-control" id="medicines" rows="2" placeholder="Medicines" required></textarea>
+                </div>
+                <div class="col-md-3">
+                    <textarea class="form-control" id="notes" rows="2" placeholder="Notes"></textarea>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary">Add Prescription</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Prescriptions Table -->
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Prescriptions List</h5>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Appointment</th>
+                        <th>Medicines</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="prescriptionsTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let isEditing = false;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        loadAppointments();
+        loadPrescriptions();
+
+        document.getElementById('prescriptionForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (isEditing) return;
+
+            const formData = new FormData();
+            formData.append('appointment_id', document.getElementById('appointment_id').value);
+            formData.append('medicines', document.getElementById('medicines').value);
+            formData.append('notes', document.getElementById('notes').value);
+
+            fetch('/api/prescriptions/add/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    loadPrescriptions();
+                    document.getElementById('prescriptionForm').reset();
+                });
+        });
+    });
+
+    function loadAppointments() {
+        fetch('/api/appointments/')
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('appointment_id');
+                data.appointments.forEach(apt => {
+                    const option = document.createElement('option');
+                    option.value = apt.id;
+                    option.textContent = `Appointment ${apt.id} - ${apt.date} ${apt.time}`;
+                    select.appendChild(option);
+                });
+            });
+    }
+
+    function loadPrescriptions() {
+        fetch('/api/prescriptions/')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('prescriptionsTableBody');
+                tbody.innerHTML = '';
+                data.prescriptions.forEach(prescription => {
+                    tbody.innerHTML += `
+                    <tr data-id="${prescription.id}">
+                        <td>${prescription.id}</td>
+                        <td>Appointment ${prescription.appointment_id}</td>
+                        <td>${prescription.medicines}</td>
+                        <td>${prescription.notes || '-'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning me-2" onclick="editPrescription(${prescription.id})">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deletePrescription(${prescription.id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+                });
+            });
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function deletePrescription(id) {
+        if (confirm('Are you sure you want to delete this prescription?')) {
+            fetch(`/api/prescriptions/delete/${id}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            })
+                .then(response => response.json())
+                .then(data => loadPrescriptions());
+        }
+    }
+
+    function editPrescription(id) {
+        isEditing = true;
+        
+        const row = document.querySelector(`tr[data-id="${id}"]`);
+        const form = document.getElementById('prescriptionForm');
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        submitButton.textContent = 'Save Edit';
+        document.getElementById('appointment_id').value = row.cells[1].textContent.split(' ')[1];
+        document.getElementById('medicines').value = row.cells[2].textContent;
+        document.getElementById('notes').value = row.cells[3].textContent === '-' ? '' : row.cells[3].textContent;
+
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            updatePrescription(id);
+        };
+    }
+
+    function updatePrescription(id) {
+        const formData = new FormData();
+        formData.append('appointment_id', document.getElementById('appointment_id').value);
+        formData.append('medicines', document.getElementById('medicines').value);
+        formData.append('notes', document.getElementById('notes').value);
+
+        fetch(`/api/prescriptions/update/${id}/`, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        })
+            .then(response => response.json())
+            .then(data => {
+                loadPrescriptions();
+                resetForm();
+            });
+    }
+
+    function resetForm() {
+        const form = document.getElementById('prescriptionForm');
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        form.reset();
+        submitButton.textContent = 'Add Prescription';
+        form.onsubmit = null;
+        isEditing = false;
+    }
+</script>
+{% endblock %}

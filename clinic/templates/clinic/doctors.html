@@ -1,0 +1,192 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Doctors - Clinic System{% endblock %}
+
+{% block content %}
+<h2>Doctors Management</h2>
+
+<!-- Create Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Add New Doctor</h5>
+        <form id="doctorForm">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="name" placeholder="Doctor Name" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="specialty" placeholder="Specialty" required>
+                </div>
+                <div class="col-md-2">
+                    <input type="tel" class="form-control" id="phone" placeholder="Phone" required>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control" id="fee" placeholder="Fee" required>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary">Add Doctor</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Doctors Table -->
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Doctors List</h5>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Specialty</th>
+                        <th>Phone</th>
+                        <th>Fee</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="doctorsTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let isEditing = false;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        loadDoctors();
+
+        document.getElementById('doctorForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (isEditing) return; // Prevent adding new entry when editing
+
+            const formData = new FormData();
+            formData.append('name', document.getElementById('name').value);
+            formData.append('specialty', document.getElementById('specialty').value);
+            formData.append('phone', document.getElementById('phone').value);
+            formData.append('fee', document.getElementById('fee').value);
+
+            fetch('/api/doctors/add/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    loadDoctors();
+                    resetForm();
+                });
+        });
+    });
+
+    function loadDoctors() {
+        fetch('/api/doctors/')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('doctorsTableBody');
+                tbody.innerHTML = '';
+                data.doctors.forEach(doctor => {
+                    tbody.innerHTML += `
+                    <tr data-id="${doctor.id}">
+                        <td>${doctor.id}</td>
+                        <td>${doctor.name}</td>
+                        <td>${doctor.specialty}</td>
+                        <td>${doctor.phone}</td>
+                        <td>${doctor.fee}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning me-2" onclick="editDoctor(${doctor.id})">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteDoctor(${doctor.id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+                });
+            });
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function deleteDoctor(id) {
+        if (confirm('Are you sure you want to delete this doctor?')) {
+            fetch(`/api/doctors/delete/${id}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            })
+                .then(response => response.json())
+                .then(data => loadDoctors());
+        }
+    }
+
+    function editDoctor(id) {
+        isEditing = true;
+        const row = document.querySelector(`tr[data-id="${id}"]`);
+        const form = document.getElementById('doctorForm');
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        // Change button text
+        submitButton.textContent = 'Save Edit';
+
+        document.getElementById('name').value = row.cells[1].textContent;
+        document.getElementById('specialty').value = row.cells[2].textContent;
+        document.getElementById('phone').value = row.cells[3].textContent;
+        document.getElementById('fee').value = row.cells[4].textContent;
+
+        // Modify the form submission
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            updateDoctor(id);
+        };
+    }
+
+    function updateDoctor(id) {
+        const formData = new FormData();
+        formData.append('name', document.getElementById('name').value);
+        formData.append('specialty', document.getElementById('specialty').value);
+        formData.append('phone', document.getElementById('phone').value);
+        formData.append('fee', document.getElementById('fee').value);
+
+        fetch(`/api/doctors/update/${id}/`, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        })
+            .then(response => response.json())
+            .then(data => {
+                loadDoctors();
+                resetForm();
+            });
+    }
+
+    function resetForm() {
+        const form = document.getElementById('doctorForm');
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        form.reset();
+        submitButton.textContent = 'Add Doctor';
+        form.onsubmit = null;
+        isEditing = false;
+    }
+</script>
+{% endblock %}
