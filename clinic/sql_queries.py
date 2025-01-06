@@ -109,15 +109,17 @@ def delete_appointment(appointment_id):
 def get_appointments_with_details():
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT a.Appointment_ID, p.Patient_ID, 
-                   p.FirstName || ' ' || p.LastName as Patient, 
-                   d.Doctor_ID, 
-                   d.FirstName || ' ' || d.LastName as Doctor, 
-                   a.Date, a.Time,
-                   julianday('now') - julianday(Date || ' ' || Time) AS TimeElapsed
-            FROM Appointment a
-            JOIN Patient p ON a.Patient_ID = p.Patient_ID
-            JOIN Doctor d ON a.Doctor_ID = d.Doctor_ID
+            SELECT Appointment.Appointment_ID, 
+                   Patient.Patient_ID,
+                   Patient.FirstName || ' ' || Patient.LastName as Patient, 
+                   Doctor.Doctor_ID,
+                   Doctor.FirstName || ' ' || Doctor.LastName as Doctor,
+                   Appointment.Date, 
+                   Appointment.Time,
+                   julianday('now') - julianday(Appointment.Date || ' ' || Appointment.Time) AS TimeElapsed
+            FROM Appointment
+            JOIN Patient ON Appointment.Patient_ID = Patient.Patient_ID
+            JOIN Doctor ON Appointment.Doctor_ID = Doctor.Doctor_ID
         """)
         return cursor.fetchall()
 
@@ -156,16 +158,20 @@ def delete_prescription(prescription_id):
 def get_prescriptions_with_appointment_details():
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT p.Prescription_ID, a.Appointment_ID, 
-                   pt.FirstName || ' ' || pt.LastName as Patient,
-                   d.FirstName || ' ' || d.LastName as Doctor, 
-                   a.Date, i.Insurance_ID, i.Name as Insurance,
-                   p.Medicines, p.Notes
-            FROM Prescription p
-            JOIN Appointment a ON p.Appointment_ID = a.Appointment_ID
-            JOIN Patient pt ON a.Patient_ID = pt.Patient_ID
-            JOIN Doctor d ON a.Doctor_ID = d.Doctor_ID
-            LEFT JOIN Insurance i ON p.Insurance_ID = i.Insurance_ID
+            SELECT Prescription.Prescription_ID, 
+                   Appointment.Appointment_ID,
+                   Patient.FirstName || ' ' || Patient.LastName as Patient,
+                   Doctor.FirstName || ' ' || Doctor.LastName as Doctor,
+                   Appointment.Date,
+                   Insurance.Insurance_ID,
+                   Insurance.Name as Insurance,
+                   Prescription.Medicines,
+                   Prescription.Notes
+            FROM Prescription
+            JOIN Appointment ON Prescription.Appointment_ID = Appointment.Appointment_ID
+            JOIN Patient ON Appointment.Patient_ID = Patient.Patient_ID
+            JOIN Doctor ON Appointment.Doctor_ID = Doctor.Doctor_ID
+            LEFT JOIN Insurance ON Prescription.Insurance_ID = Insurance.Insurance_ID
         """)
         return cursor.fetchall()
 
