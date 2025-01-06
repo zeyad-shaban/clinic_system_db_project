@@ -3,11 +3,11 @@ from django.db import connection
 # Patient
 
 
-def add_patient(name, email, phone, age):
+def add_patient(first_name, last_name, email, phone, age):
     with connection.cursor() as cursor:
         cursor.execute(
-            "INSERT INTO Patient (Name, Email, Phone, Age) VALUES (%s, %s, %s, %s)",
-            [name, email, phone, age],
+            "INSERT INTO Patient (FirstName, LastName, Email, Phone, Age) VALUES (%s, %s, %s, %s, %s)",
+            [first_name, last_name, email, phone, age],
         )
 
 
@@ -18,11 +18,11 @@ def get_all_patients():
     return rows
 
 
-def update_patient(patient_id, name, email, phone, age):
+def update_patient(patient_id, first_name, last_name, email, phone, age):
     with connection.cursor() as cursor:
         cursor.execute(
-            "UPDATE Patient SET Name=%s, Email=%s, Phone=%s, Age=%s WHERE Patient_ID=%s",
-            [name, email, phone, age, patient_id],
+            "UPDATE Patient SET FirstName=%s, LastName=%s, Email=%s, Phone=%s, Age=%s WHERE Patient_ID=%s",
+            [first_name, last_name, email, phone, age, patient_id],
         )
 
 
@@ -34,11 +34,11 @@ def delete_patient(patient_id):
 # Doctor
 
 
-def add_doctor(name, specialty, phone, fee):
+def add_doctor(first_name, last_name, specialty, phone, fee):
     with connection.cursor() as cursor:
         cursor.execute(
-            "INSERT INTO Doctor (Name, Specialty, Phone, Fee) VALUES (%s, %s, %s, %s)",
-            [name, specialty, phone, fee],
+            "INSERT INTO Doctor (FirstName, LastName, Specialty, Phone, Fee) VALUES (%s, %s, %s, %s, %s)",
+            [first_name, last_name, specialty, phone, fee],
         )
 
 
@@ -49,11 +49,11 @@ def get_all_doctors():
     return rows
 
 
-def update_doctor(doctor_id, name, specialty, phone, fee):
+def update_doctor(doctor_id, first_name, last_name, specialty, phone, fee):
     with connection.cursor() as cursor:
         cursor.execute(
-            "UPDATE Doctor SET Name=%s, Specialty=%s, Phone=%s, Fee=%s WHERE Doctor_ID=%s",
-            [name, specialty, phone, fee, doctor_id],
+            "UPDATE Doctor SET FirstName=%s, LastName=%s, Specialty=%s, Phone=%s, Fee=%s WHERE Doctor_ID=%s",
+            [first_name, last_name, specialty, phone, fee, doctor_id],
         )
 
 
@@ -109,16 +109,20 @@ def delete_appointment(appointment_id):
 def get_appointments_with_details():
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT a.Appointment_ID, p.Patient_ID, p.Name as Patient, 
-                   d.Doctor_ID, d.Name as Doctor, a.Date, a.Time 
+            SELECT a.Appointment_ID, p.Patient_ID, 
+                   p.FirstName || ' ' || p.LastName as Patient, 
+                   d.Doctor_ID, 
+                   d.FirstName || ' ' || d.LastName as Doctor, 
+                   a.Date, a.Time,
+                   julianday('now') - julianday(Date || ' ' || Time) AS TimeElapsed
             FROM Appointment a
             JOIN Patient p ON a.Patient_ID = p.Patient_ID
             JOIN Doctor d ON a.Doctor_ID = d.Doctor_ID
         """)
         return cursor.fetchall()
 
-
 # Prescription
+
 
 def add_prescription(appointment_id, insurance_id, medicines, notes):
     with connection.cursor() as cursor:
@@ -152,8 +156,10 @@ def delete_prescription(prescription_id):
 def get_prescriptions_with_appointment_details():
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT p.Prescription_ID, a.Appointment_ID, pt.Name as Patient, 
-                   d.Name as Doctor, a.Date, i.Insurance_ID, i.Name as Insurance,
+            SELECT p.Prescription_ID, a.Appointment_ID, 
+                   pt.FirstName || ' ' || pt.LastName as Patient,
+                   d.FirstName || ' ' || d.LastName as Doctor, 
+                   a.Date, i.Insurance_ID, i.Name as Insurance,
                    p.Medicines, p.Notes
             FROM Prescription p
             JOIN Appointment a ON p.Appointment_ID = a.Appointment_ID

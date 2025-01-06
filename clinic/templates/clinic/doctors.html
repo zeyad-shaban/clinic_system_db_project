@@ -11,9 +11,12 @@
         <form id="doctorForm">
             <div class="row g-3">
                 <div class="col-md-3">
-                    <input type="text" class="form-control" id="name" placeholder="Doctor Name" required>
+                    <input type="text" class="form-control" id="firstName" placeholder="First Name" required>
                 </div>
                 <div class="col-md-3">
+                    <input type="text" class="form-control" id="lastName" placeholder="Last Name" required>
+                </div>
+                <div class="col-md-2">
                     <input type="text" class="form-control" id="specialty" placeholder="Specialty" required>
                 </div>
                 <div class="col-md-2">
@@ -22,10 +25,8 @@
                 <div class="col-md-2">
                     <input type="number" class="form-control" id="fee" placeholder="Fee" required>
                 </div>
-                <div class="row mt-3">
-                    <div class="col-md-12">
-                        <button type="submit" class="btn btn-primary">Add Doctor</button>
-                    </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Add Doctor</button>
                 </div>
             </div>
         </form>
@@ -67,7 +68,8 @@
             if (isEditing) return;
 
             const formData = new FormData();
-            formData.append('name', document.getElementById('name').value);
+            formData.append('firstName', document.getElementById('firstName').value);
+            formData.append('lastName', document.getElementById('lastName').value);
             formData.append('specialty', document.getElementById('specialty').value);
             formData.append('phone', document.getElementById('phone').value);
             formData.append('fee', document.getElementById('fee').value);
@@ -95,7 +97,9 @@
                 tbody.innerHTML = '';
                 data.doctors.forEach(doctor => {
                     tbody.innerHTML += `
-                    <tr data-id="${doctor.id}">
+                    <tr data-id="${doctor.id}" 
+                        data-first-name="${doctor.firstName}"
+                        data-last-name="${doctor.lastName}">
                         <td>${doctor.id}</td>
                         <td>${doctor.name}</td>
                         <td>${doctor.specialty}</td>
@@ -128,12 +132,13 @@
         const form = document.getElementById('doctorForm');
         const submitButton = form.querySelector('button[type="submit"]');
 
-        submitButton.textContent = 'Save Edit';
-
-        document.getElementById('name').value = row.cells[1].textContent;
+        document.getElementById('firstName').value = row.dataset.firstName;
+        document.getElementById('lastName').value = row.dataset.lastName;
         document.getElementById('specialty').value = row.cells[2].textContent;
         document.getElementById('phone').value = row.cells[3].textContent;
         document.getElementById('fee').value = row.cells[4].textContent;
+
+        submitButton.textContent = 'Save Edit';
 
         form.onsubmit = (e) => {
             e.preventDefault();
@@ -143,7 +148,8 @@
 
     function updateDoctor(id) {
         const formData = new FormData();
-        formData.append('name', document.getElementById('name').value);
+        formData.append('firstName', document.getElementById('firstName').value);
+        formData.append('lastName', document.getElementById('lastName').value);
         formData.append('specialty', document.getElementById('specialty').value);
         formData.append('phone', document.getElementById('phone').value);
         formData.append('fee', document.getElementById('fee').value);

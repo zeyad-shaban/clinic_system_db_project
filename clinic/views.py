@@ -24,7 +24,15 @@ def patients_page(request):
 def get_patients(request):
     patients = get_all_patients()
     data = [
-        {"id": p[0], "name": p[1], "email": p[2], "phone": p[3], "age": p[4]}
+        {
+            "id": p[0],
+            "firstName": p[1],
+            "lastName": p[2],
+            "name": f"{p[1]} {p[2]}",
+            "email": p[3],
+            "phone": p[4],
+            "age": p[5]
+        }
         for p in patients
     ]
     return JsonResponse({"patients": data})
@@ -32,11 +40,12 @@ def get_patients(request):
 
 def add_new_patient(request):
     if request.method == "POST":
-        name = request.POST["name"]
+        first_name = request.POST["firstName"]
+        last_name = request.POST["lastName"]
         email = request.POST["email"]
         phone = request.POST["phone"]
         age = request.POST["age"]
-        add_patient(name, email, phone, age)
+        add_patient(first_name, last_name, email, phone, age)
         return JsonResponse({"message": "Patient added successfully!"})
 
 
@@ -48,11 +57,12 @@ def delete_patient_view(request, patient_id):
 
 def update_patient_view(request, patient_id):
     if request.method == "POST":
-        name = request.POST["name"]
+        first_name = request.POST["firstName"]
+        last_name = request.POST["lastName"]
         email = request.POST["email"]
         phone = request.POST["phone"]
         age = request.POST["age"]
-        update_patient(patient_id, name, email, phone, age)
+        update_patient(patient_id, first_name, last_name, email, phone, age)
         return JsonResponse({"message": "Patient updated successfully"})
 
 # Doctors CRUD APIs
@@ -65,8 +75,15 @@ def doctors_page(request):
 def get_doctors(request):
     doctors = get_all_doctors()
     data = [
-        {"id": d[0], "name": d[1], "specialty": d[2],
-            "phone": d[3], "fee": d[4]}
+        {
+            "id": d[0],
+            "firstName": d[1],
+            "lastName": d[2],
+            "name": f"{d[1]} {d[2]}",
+            "specialty": d[3],
+            "phone": d[4],
+            "fee": d[5]
+        }
         for d in doctors
     ]
     return JsonResponse({"doctors": data})
@@ -74,11 +91,12 @@ def get_doctors(request):
 
 def add_new_doctor(request):
     if request.method == "POST":
-        name = request.POST["name"]
+        first_name = request.POST["firstName"]
+        last_name = request.POST["lastName"]
         specialty = request.POST["specialty"]
         phone = request.POST["phone"]
         fee = request.POST["fee"]
-        add_doctor(name, specialty, phone, fee)
+        add_doctor(first_name, last_name, specialty, phone, fee)
         return JsonResponse({"message": "Doctor added successfully!"})
 
 
@@ -90,11 +108,12 @@ def delete_doctor_view(request, doctor_id):
 
 def update_doctor_view(request, doctor_id):
     if request.method == "POST":
-        name = request.POST["name"]
+        first_name = request.POST["firstName"]
+        last_name = request.POST["lastName"]
         specialty = request.POST["specialty"]
         phone = request.POST["phone"]
         fee = request.POST["fee"]
-        update_doctor(doctor_id, name, specialty, phone, fee)
+        update_doctor(doctor_id, first_name, last_name, specialty, phone, fee)
         return JsonResponse({"message": "Doctor updated successfully"})
 
 
@@ -160,13 +179,14 @@ def get_detailed_appointments(request):
             "doctor_id": a[3],
             "doctor": a[4],
             "date": a[5],
-            "time": a[6]
+            "time": a[6],
+            "timeElapsed": a[7]  # Added TimeElapsed from virtual column
         } for a in appointments
     ]
     return JsonResponse({"appointments": data})
 
-# Prescriptions CRUD APIs
 
+# Prescriptions CRUD APIs
 
 def prescriptions_page(request):
     return render(request, "clinic/prescriptions.html")

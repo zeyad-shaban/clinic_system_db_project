@@ -11,21 +11,22 @@
         <form id="patientForm">
             <div class="row g-3">
                 <div class="col-md-3">
-                    <input type="text" class="form-control" id="name" placeholder="Name" required>
+                    <input type="text" class="form-control" id="firstName" placeholder="First Name" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="lastName" placeholder="Last Name" required>
                 </div>
                 <div class="col-md-3">
                     <input type="email" class="form-control" id="email" placeholder="Email" required>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <input type="tel" class="form-control" id="phone" placeholder="Phone" required>
                 </div>
                 <div class="col-md-2">
                     <input type="number" class="form-control" id="age" placeholder="Age" required>
                 </div>
-                <div class="row mt-3">
-                    <div class="col-md-12">
-                        <button type="submit" class="btn btn-primary">Add Patient</button>
-                    </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Add Patient</button>
                 </div>
             </div>
         </form>
@@ -67,7 +68,8 @@
             if (isEditing) return;
 
             const formData = new FormData();
-            formData.append('name', document.getElementById('name').value);
+            formData.append('firstName', document.getElementById('firstName').value);
+            formData.append('lastName', document.getElementById('lastName').value);
             formData.append('email', document.getElementById('email').value);
             formData.append('phone', document.getElementById('phone').value);
             formData.append('age', document.getElementById('age').value);
@@ -82,7 +84,7 @@
                 .then(response => response.json())
                 .then(data => {
                     loadPatients();
-                    document.getElementById('patientForm').reset();
+                    resetForm();
                 });
         });
     });
@@ -95,7 +97,9 @@
                 tbody.innerHTML = '';
                 data.patients.forEach(patient => {
                     tbody.innerHTML += `
-                    <tr data-id="${patient.id}">
+                    <tr data-id="${patient.id}" 
+                        data-first-name="${patient.firstName}"
+                        data-last-name="${patient.lastName}">
                         <td>${patient.id}</td>
                         <td>${patient.name}</td>
                         <td>${patient.email}</td>
@@ -132,12 +136,13 @@
         const form = document.getElementById('patientForm');
         const submitButton = form.querySelector('button[type="submit"]');
 
-        submitButton.textContent = 'Save Edit';
-
-        document.getElementById('name').value = row.cells[1].textContent;
+        document.getElementById('firstName').value = row.dataset.firstName;
+        document.getElementById('lastName').value = row.dataset.lastName;
         document.getElementById('email').value = row.cells[2].textContent;
         document.getElementById('phone').value = row.cells[3].textContent;
         document.getElementById('age').value = row.cells[4].textContent;
+
+        submitButton.textContent = 'Save Edit';
 
         form.onsubmit = (e) => {
             e.preventDefault();
@@ -147,7 +152,8 @@
 
     function updatePatient(id) {
         const formData = new FormData();
-        formData.append('name', document.getElementById('name').value);
+        formData.append('firstName', document.getElementById('firstName').value);
+        formData.append('lastName', document.getElementById('lastName').value);
         formData.append('email', document.getElementById('email').value);
         formData.append('phone', document.getElementById('phone').value);
         formData.append('age', document.getElementById('age').value);

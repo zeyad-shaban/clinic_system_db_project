@@ -48,6 +48,7 @@
                         <th>Doctor</th>
                         <th>Date</th>
                         <th>Time</th>
+                        <th>Time Elapsed</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -136,6 +137,7 @@
                         <td>${appointment.doctor}</td>
                         <td>${appointment.date}</td>
                         <td>${appointment.time}</td>
+                        <td>${Math.round(appointment.timeElapsed * 24)} hours</td>
                         <td>
                             <button class="btn btn-sm btn-warning me-2" onclick="editAppointment(${appointment.id})">Edit</button>
                             <button class="btn btn-sm btn-danger" onclick="deleteAppointment(${appointment.id})">Delete</button>
