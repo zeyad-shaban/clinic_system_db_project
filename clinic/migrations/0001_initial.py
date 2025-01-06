@@ -36,8 +36,8 @@ class Migration(migrations.Migration):
                 Doctor_ID INTEGER,
                 Date TEXT NOT NULL,
                 Time TEXT NOT NULL,
-                FOREIGN KEY (Patient_ID) REFERENCES Patient(Patient_ID),
-                FOREIGN KEY (Doctor_ID) REFERENCES Doctor(Doctor_ID)
+                FOREIGN KEY (Patient_ID) REFERENCES Patient(Patient_ID) ON DELETE CASCADE,
+                FOREIGN KEY (Doctor_ID) REFERENCES Doctor(Doctor_ID) ON DELETE CASCADE
             );
 
             CREATE TABLE Prescription (
@@ -46,8 +46,8 @@ class Migration(migrations.Migration):
                 Department_ID INTEGER,
                 Medicines TEXT NOT NULL,
                 Notes TEXT,
-                FOREIGN KEY (Appointment_ID) REFERENCES Appointment(Appointment_ID),
-                FOREIGN KEY (Department_ID) REFERENCES Department(Department_ID)
+                FOREIGN KEY (Appointment_ID) REFERENCES Appointment(Appointment_ID) ON DELETE CASCADE,
+                FOREIGN KEY (Department_ID) REFERENCES Department(Department_ID) ON DELETE CASCADE
             );
     """
         )
