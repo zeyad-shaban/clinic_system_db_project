@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
 
             CREATE TABLE Prescription (
                 Prescription_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                Appointment_ID INTEGER,
+                Appointment_ID INTEGER NOT NULL,
                 Insurance_ID INTEGER NULL,
                 Medicines TEXT NOT NULL,
                 Notes TEXT,
