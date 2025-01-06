@@ -16,8 +16,8 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select class="form-select" id="department_id" required>
-                        <option value="">Select Department</option>
+                    <select class="form-select" id="insurance_id">
+                        <option value="">Select Insurance (Optional)</option>
                     </select>
                 </div>
                 <div class="col-md-4">
@@ -47,9 +47,9 @@
                         <th>Patient</th>
                         <th>Doctor</th>
                         <th>Date</th>
+                        <th>Insurance</th>
                         <th>Medicines</th>
                         <th>Notes</th>
-                        <th>Department</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -66,8 +66,8 @@
     let isEditing = false;
 
     document.addEventListener('DOMContentLoaded', function () {
+        loadInsurance();
         loadAppointments();
-        loadDepartments();
         loadPrescriptions();
 
         document.getElementById('prescriptionForm').addEventListener('submit', function (e) {
@@ -76,7 +76,7 @@
 
             const formData = new FormData();
             formData.append('appointment_id', document.getElementById('appointment_id').value);
-            formData.append('department_id', document.getElementById('department_id').value);
+            formData.append('insurance_id', document.getElementById('insurance_id').value);
             formData.append('medicines', document.getElementById('medicines').value);
             formData.append('notes', document.getElementById('notes').value);
 
@@ -109,15 +109,16 @@
             });
     }
 
-    function loadDepartments() {
-        fetch('/api/departments/')
+    function loadInsurance() {
+        fetch('/api/insurance/')
             .then(response => response.json())
             .then(data => {
-                const select = document.getElementById('department_id');
-                data.departments.forEach(dept => {
+                const select = document.getElementById('insurance_id');
+                select.innerHTML = '<option value="">Select Insurance (Optional)</option>';
+                data.insurance.forEach(ins => {
                     const option = document.createElement('option');
-                    option.value = dept.id;
-                    option.textContent = dept.name;
+                    option.value = ins.id;
+                    option.textContent = `${ins.name} (${ins.coverage}%)`;
                     select.appendChild(option);
                 });
             });
@@ -133,12 +134,12 @@
                     tbody.innerHTML += `
                     <tr data-id="${prescription.id}" 
                         data-appointment-id="${prescription.appointment_id}"
-                        data-department-id="${prescription.department_id}">
+                        data-insurance-id="${prescription.insurance_id}">
                         <td>${prescription.id}</td>
                         <td>${prescription.patient}</td>
                         <td>${prescription.doctor}</td>
                         <td>${prescription.date}</td>
-                        <td>${prescription.department}</td>
+                        <td>${prescription.insurance || '-'}</td>
                         <td>${prescription.medicines}</td>
                         <td>${prescription.notes || '-'}</td>
                         <td>
@@ -149,21 +150,6 @@
                 `;
                 });
             });
-    }
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
     }
 
     function deletePrescription(id) {
@@ -184,7 +170,7 @@
         const submitButton = form.querySelector('button[type="submit"]');
 
         document.getElementById('appointment_id').value = row.dataset.appointmentId;
-        document.getElementById('department_id').value = row.dataset.departmentId;
+        document.getElementById('insurance_id').value = row.dataset.insuranceId;
         document.getElementById('medicines').value = row.cells[5].textContent;
         document.getElementById('notes').value = row.cells[6].textContent === '-' ? '' : row.cells[6].textContent;
 
@@ -199,7 +185,7 @@
     function updatePrescription(id) {
         const formData = new FormData();
         formData.append('appointment_id', document.getElementById('appointment_id').value);
-        formData.append('department_id', document.getElementById('department_id').value);
+        formData.append('insurance_id', document.getElementById('insurance_id').value);
         formData.append('medicines', document.getElementById('medicines').value);
         formData.append('notes', document.getElementById('notes').value);
 

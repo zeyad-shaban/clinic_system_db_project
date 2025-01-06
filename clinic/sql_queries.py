@@ -74,35 +74,6 @@ def get_average_doctor_fee():
         cursor.execute("SELECT AVG(Fee) FROM Doctor")
         return cursor.fetchone()
 
-# Department
-
-def add_department(name, head, floor):
-    with connection.cursor() as cursor:
-        cursor.execute(
-            "INSERT INTO Department (Name, Head, Floor) VALUES (%s, %s, %s)",
-            [name, head, floor],
-        )
-
-
-def get_all_departments():
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM Department")
-        rows = cursor.fetchall()
-    return rows
-
-
-def update_department(department_id, name, head, floor):
-    with connection.cursor() as cursor:
-        cursor.execute(
-            "UPDATE Department SET Name=%s, Head=%s, Floor=%s WHERE Department_ID=%s",
-            [name, head, floor, department_id],
-        )
-
-
-def delete_department(department_id):
-    with connection.cursor() as cursor:
-        cursor.execute(
-            "DELETE FROM Department WHERE Department_ID=%s", [department_id])
 
 # Appointment
 
@@ -149,19 +120,21 @@ def get_appointments_with_details():
 
 # Prescription
 
-def add_prescription(appointment_id, department_id, medicines, notes):
+def add_prescription(appointment_id, insurance_id, medicines, notes):
     with connection.cursor() as cursor:
         cursor.execute(
-            "INSERT INTO Prescription (Appointment_ID, Department_ID, Medicines, Notes) VALUES (%s, %s, %s, %s)",
-            [appointment_id, department_id, medicines, notes],
+            "INSERT INTO Prescription (Appointment_ID, Insurance_ID, Medicines, Notes) VALUES (%s, %s, %s, %s)",
+            [appointment_id, insurance_id, medicines, notes],
         )
 
-def update_prescription(prescription_id, appointment_id, department_id, medicines, notes):
+
+def update_prescription(prescription_id, appointment_id, insurance_id, medicines, notes):
     with connection.cursor() as cursor:
         cursor.execute(
-            "UPDATE Prescription SET Appointment_ID=%s, Department_ID=%s, Medicines=%s, Notes=%s WHERE Prescription_ID=%s",
-            [appointment_id, department_id, medicines, notes, prescription_id],
+            "UPDATE Prescription SET Appointment_ID=%s, Insurance_ID=%s, Medicines=%s, Notes=%s WHERE Prescription_ID=%s",
+            [appointment_id, insurance_id, medicines, notes, prescription_id],
         )
+
 
 def get_all_prescriptions():
     with connection.cursor() as cursor:
@@ -180,12 +153,43 @@ def get_prescriptions_with_appointment_details():
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT p.Prescription_ID, a.Appointment_ID, pt.Name as Patient, 
-                   d.Name as Doctor, a.Date, dp.Department_ID, dp.Name as Department,
+                   d.Name as Doctor, a.Date, i.Insurance_ID, i.Name as Insurance,
                    p.Medicines, p.Notes
             FROM Prescription p
             JOIN Appointment a ON p.Appointment_ID = a.Appointment_ID
             JOIN Patient pt ON a.Patient_ID = pt.Patient_ID
             JOIN Doctor d ON a.Doctor_ID = d.Doctor_ID
-            JOIN Department dp ON p.Department_ID = dp.Department_ID
+            LEFT JOIN Insurance i ON p.Insurance_ID = i.Insurance_ID
         """)
         return cursor.fetchall()
+
+# Insurance CRUD
+
+
+def add_insurance(name, provider, coverage):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "INSERT INTO Insurance (Name, Provider, Coverage) VALUES (%s, %s, %s)",
+            [name, provider, coverage],
+        )
+
+
+def get_all_insurance():
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM Insurance")
+        rows = cursor.fetchall()
+    return rows
+
+
+def update_insurance(insurance_id, name, provider, coverage):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "UPDATE Insurance SET Name=%s, Provider=%s, Coverage=%s WHERE Insurance_ID=%s",
+            [name, provider, coverage, insurance_id],
+        )
+
+
+def delete_insurance(insurance_id):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "DELETE FROM Insurance WHERE Insurance_ID=%s", [insurance_id])

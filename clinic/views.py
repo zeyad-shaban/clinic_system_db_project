@@ -3,11 +3,11 @@ from django.http import JsonResponse
 from .sql_queries import (
     add_patient, get_all_patients, update_patient, delete_patient,
     add_doctor, get_all_doctors, update_doctor, delete_doctor,
-    add_department, get_all_departments, update_department, delete_department,
     add_appointment, get_all_appointments, update_appointment, delete_appointment,
     add_prescription, get_all_prescriptions, update_prescription, delete_prescription,
     get_doctors_count_by_specialty, get_average_doctor_fee,
-    get_appointments_with_details, get_prescriptions_with_appointment_details
+    get_appointments_with_details, get_prescriptions_with_appointment_details,
+    add_insurance, get_all_insurance, update_insurance, delete_insurance
 )
 
 
@@ -106,44 +106,6 @@ def get_doctor_stats(request):
         "average_fee": round(avg_fee[0], 2) if avg_fee[0] else 0
     })
 
-# Departments CRUD APIs
-
-
-def departments_page(request):
-    return render(request, "clinic/departments.html")
-
-
-def get_departments(request):
-    departments = get_all_departments()
-    data = [
-        {"id": d[0], "name": d[1], "head": d[2], "floor": d[3]}
-        for d in departments
-    ]
-    return JsonResponse({"departments": data})
-
-
-def add_new_department(request):
-    if request.method == "POST":
-        name = request.POST["name"]
-        head = request.POST["head"]
-        floor = request.POST["floor"]
-        add_department(name, head, floor)
-        return JsonResponse({"message": "Department added successfully!"})
-
-
-def delete_department_view(request, department_id):
-    if request.method == "POST":
-        delete_department(department_id)
-        return JsonResponse({"message": "Department deleted successfully"})
-
-
-def update_department_view(request, department_id):
-    if request.method == "POST":
-        name = request.POST["name"]
-        head = request.POST["head"]
-        floor = request.POST["floor"]
-        update_department(department_id, name, head, floor)
-        return JsonResponse({"message": "Department updated successfully"})
 
 # Appointments CRUD APIs
 
@@ -222,10 +184,10 @@ def get_prescriptions(request):
 def add_new_prescription(request):
     if request.method == "POST":
         appointment_id = request.POST["appointment_id"]
-        department_id = request.POST["department_id"]
+        insurance_id = request.POST["insurance_id"] or None
         medicines = request.POST["medicines"]
         notes = request.POST["notes"]
-        add_prescription(appointment_id, department_id, medicines, notes)
+        add_prescription(appointment_id, insurance_id, medicines, notes)
         return JsonResponse({"message": "Prescription added successfully!"})
 
 
@@ -238,11 +200,11 @@ def delete_prescription_view(request, prescription_id):
 def update_prescription_view(request, prescription_id):
     if request.method == "POST":
         appointment_id = request.POST["appointment_id"]
-        department_id = request.POST["department_id"]
+        insurance_id = request.POST["insurance_id"] or None
         medicines = request.POST["medicines"]
         notes = request.POST["notes"]
         update_prescription(prescription_id, appointment_id,
-                            department_id, medicines, notes)
+                            insurance_id, medicines, notes)
         return JsonResponse({"message": "Prescription updated successfully"})
 
 
@@ -255,10 +217,49 @@ def get_detailed_prescriptions(request):
             "patient": p[2],
             "doctor": p[3],
             "date": p[4],
-            "department_id": p[5],
-            "department": p[6],
+            "insurance_id": p[5],
+            "insurance": p[6],
             "medicines": p[7],
             "notes": p[8]
         } for p in prescriptions
     ]
     return JsonResponse({"prescriptions": data})
+
+# Insurance CRUD APIs
+
+
+def insurance_page(request):
+    return render(request, "clinic/insurance.html")
+
+
+def get_insurance(request):
+    insurance = get_all_insurance()
+    data = [
+        {"id": i[0], "name": i[1], "provider": i[2], "coverage": i[3]}
+        for i in insurance
+    ]
+    return JsonResponse({"insurance": data})
+
+
+def add_new_insurance(request):
+    if request.method == "POST":
+        name = request.POST["name"]
+        provider = request.POST["provider"]
+        coverage = request.POST["coverage"]
+        add_insurance(name, provider, coverage)
+        return JsonResponse({"message": "Insurance added successfully!"})
+
+
+def delete_insurance_view(request, insurance_id):
+    if request.method == "POST":
+        delete_insurance(insurance_id)
+        return JsonResponse({"message": "Insurance deleted successfully"})
+
+
+def update_insurance_view(request, insurance_id):
+    if request.method == "POST":
+        name = request.POST["name"]
+        provider = request.POST["provider"]
+        coverage = request.POST["coverage"]
+        update_insurance(insurance_id, name, provider, coverage)
+        return JsonResponse({"message": "Insurance updated successfully"})

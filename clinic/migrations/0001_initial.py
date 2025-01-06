@@ -22,14 +22,7 @@ class Migration(migrations.Migration):
                 Phone TEXT NOT NULL,
                 Fee INTEGER NOT NULL
             );
-
-            CREATE TABLE Department (
-                Department_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                Name TEXT NOT NULL,
-                Head TEXT NOT NULL,
-                Floor INTEGER NOT NULL
-            );
-
+            
             CREATE TABLE Appointment (
                 Appointment_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 Patient_ID INTEGER,
@@ -40,14 +33,21 @@ class Migration(migrations.Migration):
                 FOREIGN KEY (Doctor_ID) REFERENCES Doctor(Doctor_ID) ON DELETE CASCADE
             );
 
+            CREATE TABLE Insurance (
+                Insurance_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                Name TEXT NOT NULL,
+                Provider TEXT NOT NULL,
+                Coverage INTEGER NOT NULL
+            );
+
             CREATE TABLE Prescription (
                 Prescription_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 Appointment_ID INTEGER,
-                Department_ID INTEGER,
+                Insurance_ID INTEGER NULL,
                 Medicines TEXT NOT NULL,
                 Notes TEXT,
                 FOREIGN KEY (Appointment_ID) REFERENCES Appointment(Appointment_ID) ON DELETE CASCADE,
-                FOREIGN KEY (Department_ID) REFERENCES Department(Department_ID) ON DELETE CASCADE
+                FOREIGN KEY (Insurance_ID) REFERENCES Insurance(Insurance_ID) ON DELETE CASCADE
             );
     """
         )

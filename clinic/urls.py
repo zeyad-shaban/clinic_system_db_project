@@ -22,15 +22,14 @@ urlpatterns = [
          views.update_doctor_view, name="update_doctor"),
     path("api/stats/doctors/", views.get_doctor_stats, name="doctor_stats"),
 
-    # Departments URLs
-    path("departments/", views.departments_page, name="departments_page"),
-    path("api/departments/", views.get_departments, name="get_departments"),
-    path("api/departments/add/", views.add_new_department,
-         name="add_new_department"),
-    path("api/departments/delete/<int:department_id>/",
-         views.delete_department_view, name="delete_department"),
-    path("api/departments/update/<int:department_id>/",
-         views.update_department_view, name="update_department"),
+    # Insurance URLs
+    path("insurance/", views.insurance_page, name="insurance_page"),
+    path("api/insurance/", views.get_insurance, name="get_insurance"),
+    path("api/insurance/add/", views.add_new_insurance, name="add_new_insurance"),
+    path("api/insurance/delete/<int:insurance_id>/",
+         views.delete_insurance_view, name="delete_insurance"),
+    path("api/insurance/update/<int:insurance_id>/",
+         views.update_insurance_view, name="update_insurance"),
 
     # Appointments URLs
     path("appointments/", views.appointments_page, name="appointments_page"),
@@ -44,7 +43,7 @@ urlpatterns = [
     path("api/detailed/appointments/", views.get_detailed_appointments,
          name="detailed_appointments"),
 
-    # Prescriptions URL
+    # Prescriptions URLs
     path("prescriptions/", views.prescriptions_page, name="prescriptions_page"),
     path("api/prescriptions/", views.get_prescriptions, name="get_prescriptions"),
     path("api/prescriptions/add/", views.add_new_prescription,
