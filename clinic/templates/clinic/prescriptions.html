@@ -15,6 +15,11 @@
                         <option value="">Select Appointment</option>
                     </select>
                 </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="department_id" required>
+                        <option value="">Select Department</option>
+                    </select>
+                </div>
                 <div class="col-md-4">
                     <textarea class="form-control" id="medicines" rows="2" placeholder="Medicines" required></textarea>
                 </div>
@@ -44,6 +49,7 @@
                         <th>Date</th>
                         <th>Medicines</th>
                         <th>Notes</th>
+                        <th>Department</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -61,6 +67,7 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         loadAppointments();
+        loadDepartments();
         loadPrescriptions();
 
         document.getElementById('prescriptionForm').addEventListener('submit', function (e) {
@@ -69,6 +76,7 @@
 
             const formData = new FormData();
             formData.append('appointment_id', document.getElementById('appointment_id').value);
+            formData.append('department_id', document.getElementById('department_id').value);
             formData.append('medicines', document.getElementById('medicines').value);
             formData.append('notes', document.getElementById('notes').value);
 
@@ -101,6 +109,20 @@
             });
     }
 
+    function loadDepartments() {
+        fetch('/api/departments/')
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('department_id');
+                data.departments.forEach(dept => {
+                    const option = document.createElement('option');
+                    option.value = dept.id;
+                    option.textContent = dept.name;
+                    select.appendChild(option);
+                });
+            });
+    }
+
     function loadPrescriptions() {
         fetch('/api/detailed/prescriptions/')
             .then(response => response.json())
@@ -110,11 +132,13 @@
                 data.prescriptions.forEach(prescription => {
                     tbody.innerHTML += `
                     <tr data-id="${prescription.id}" 
-                        data-appointment-id="${prescription.appointment_id}">
+                        data-appointment-id="${prescription.appointment_id}"
+                        data-department-id="${prescription.department_id}">
                         <td>${prescription.id}</td>
                         <td>${prescription.patient}</td>
                         <td>${prescription.doctor}</td>
                         <td>${prescription.date}</td>
+                        <td>${prescription.department}</td>
                         <td>${prescription.medicines}</td>
                         <td>${prescription.notes || '-'}</td>
                         <td>
@@ -160,8 +184,9 @@
         const submitButton = form.querySelector('button[type="submit"]');
 
         document.getElementById('appointment_id').value = row.dataset.appointmentId;
-        document.getElementById('medicines').value = row.cells[4].textContent;
-        document.getElementById('notes').value = row.cells[5].textContent === '-' ? '' : row.cells[5].textContent;
+        document.getElementById('department_id').value = row.dataset.departmentId;
+        document.getElementById('medicines').value = row.cells[5].textContent;
+        document.getElementById('notes').value = row.cells[6].textContent === '-' ? '' : row.cells[6].textContent;
 
         submitButton.textContent = 'Save Edit';
 
@@ -174,6 +199,7 @@
     function updatePrescription(id) {
         const formData = new FormData();
         formData.append('appointment_id', document.getElementById('appointment_id').value);
+        formData.append('department_id', document.getElementById('department_id').value);
         formData.append('medicines', document.getElementById('medicines').value);
         formData.append('notes', document.getElementById('notes').value);
 

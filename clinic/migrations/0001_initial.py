@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             """
-            CREATE TABLE Patients (
+            CREATE TABLE Patient (
                 Patient_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 Name TEXT NOT NULL,
                 Email TEXT UNIQUE NOT NULL,
@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
                 Age INTEGER NOT NULL
             );
 
-            CREATE TABLE Doctors (
+            CREATE TABLE Doctor (
                 Doctor_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 Name TEXT NOT NULL,
                 Specialty TEXT NOT NULL,
@@ -23,30 +23,32 @@ class Migration(migrations.Migration):
                 Fee INTEGER NOT NULL
             );
 
-            CREATE TABLE Departments (
+            CREATE TABLE Department (
                 Department_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 Name TEXT NOT NULL,
                 Head TEXT NOT NULL,
                 Floor INTEGER NOT NULL
             );
 
-            CREATE TABLE Appointments (
+            CREATE TABLE Appointment (
                 Appointment_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 Patient_ID INTEGER,
                 Doctor_ID INTEGER,
                 Date TEXT NOT NULL,
                 Time TEXT NOT NULL,
-                FOREIGN KEY (Patient_ID) REFERENCES Patients(Patient_ID),
-                FOREIGN KEY (Doctor_ID) REFERENCES Doctors(Doctor_ID)
+                FOREIGN KEY (Patient_ID) REFERENCES Patient(Patient_ID),
+                FOREIGN KEY (Doctor_ID) REFERENCES Doctor(Doctor_ID)
             );
 
-            CREATE TABLE Prescriptions (
+            CREATE TABLE Prescription (
                 Prescription_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 Appointment_ID INTEGER,
+                Department_ID INTEGER,
                 Medicines TEXT NOT NULL,
                 Notes TEXT,
-                FOREIGN KEY (Appointment_ID) REFERENCES Appointments(Appointment_ID)
+                FOREIGN KEY (Appointment_ID) REFERENCES Appointment(Appointment_ID),
+                FOREIGN KEY (Department_ID) REFERENCES Department(Department_ID)
             );
-            """
+    """
         )
     ]

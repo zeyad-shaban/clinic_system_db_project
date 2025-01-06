@@ -1,15 +1,12 @@
--- Delete all data
-DELETE FROM Prescriptions;
-DELETE FROM Appointments;
-DELETE FROM Departments;
-DELETE FROM Doctors;
-DELETE FROM Patients;
+DELETE FROM Prescription;
+DELETE FROM Appointment;
+DELETE FROM Department;
+DELETE FROM Doctor;
+DELETE FROM Patient;
 
--- Reset autoincrement
 DELETE FROM sqlite_sequence;
 
--- Patients
-INSERT INTO Patients (Name, Email, Phone, Age) 
+INSERT INTO Patient (Name, Email, Phone, Age) 
 VALUES 
 ('John Doe', 'john1@email.com', '123-456-7890', 35),
 ('Jane Smith', 'jane2@email.com', '234-567-8901', 28),
@@ -22,8 +19,7 @@ VALUES
 ('Lisa Yellow', 'lisa9@email.com', '901-234-5678', 33),
 ('Jake Red', 'jake10@email.com', '012-345-6789', 38);
 
--- Doctors
-INSERT INTO Doctors (Name, Specialty, Phone, Fee) 
+INSERT INTO Doctor (Name, Specialty, Phone, Fee) 
 VALUES 
 ('Dr. Smith', 'Cardiology', '098-765-4321', 150),
 ('Dr. Johnson', 'Dermatology', '111-222-3333', 120),
@@ -36,8 +32,7 @@ VALUES
 ('Dr. Martinez', 'Gynecology', '888-999-0000', 160),
 ('Dr. Garcia', 'Psychiatry', '999-000-1111', 190);
 
--- Departments
-INSERT INTO Departments (Name, Head, Floor) 
+INSERT INTO Department (Name, Head, Floor) 
 VALUES 
 ('Cardiology', 'Dr. Smith', 3),
 ('Dermatology', 'Dr. Johnson', 1),
@@ -50,8 +45,7 @@ VALUES
 ('Gynecology', 'Dr. Martinez', 2),
 ('Psychiatry', 'Dr. Garcia', 6);
 
--- Appointments
-INSERT INTO Appointments (Patient_ID, Doctor_ID, Date, Time) 
+INSERT INTO Appointment (Patient_ID, Doctor_ID, Date, Time) 
 VALUES 
 (1, 1, '2024-03-20', '14:30'),
 (2, 2, '2024-03-21', '10:00'),
@@ -64,8 +58,7 @@ VALUES
 (9, 9, '2024-03-28', '16:45'),
 (10, 10, '2024-03-29', '14:00');
 
--- Prescriptions
-INSERT INTO Prescriptions (Appointment_ID, Medicines, Notes) 
+INSERT INTO Prescription (Appointment_ID, Medicines, Notes) 
 VALUES 
 (1, 'Aspirin 100mg', 'Take twice daily'),
 (2, 'Ibuprofen 200mg', 'Take after meals'),

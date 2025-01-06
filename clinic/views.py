@@ -222,9 +222,10 @@ def get_prescriptions(request):
 def add_new_prescription(request):
     if request.method == "POST":
         appointment_id = request.POST["appointment_id"]
+        department_id = request.POST["department_id"]
         medicines = request.POST["medicines"]
         notes = request.POST["notes"]
-        add_prescription(appointment_id, medicines, notes)
+        add_prescription(appointment_id, department_id, medicines, notes)
         return JsonResponse({"message": "Prescription added successfully!"})
 
 
@@ -237,9 +238,11 @@ def delete_prescription_view(request, prescription_id):
 def update_prescription_view(request, prescription_id):
     if request.method == "POST":
         appointment_id = request.POST["appointment_id"]
+        department_id = request.POST["department_id"]
         medicines = request.POST["medicines"]
         notes = request.POST["notes"]
-        update_prescription(prescription_id, appointment_id, medicines, notes)
+        update_prescription(prescription_id, appointment_id,
+                            department_id, medicines, notes)
         return JsonResponse({"message": "Prescription updated successfully"})
 
 
@@ -252,8 +255,10 @@ def get_detailed_prescriptions(request):
             "patient": p[2],
             "doctor": p[3],
             "date": p[4],
-            "medicines": p[5],
-            "notes": p[6]
+            "department_id": p[5],
+            "department": p[6],
+            "medicines": p[7],
+            "notes": p[8]
         } for p in prescriptions
     ]
     return JsonResponse({"prescriptions": data})
